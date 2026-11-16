@@ -1,0 +1,311 @@
+/* =========================================================
+   NATURE & WEATHER EXPLORER - style.css
+   Bagian: 1 Variabel | 2 Dasar | 3 Latar | 4 Navigasi
+           5 Dashboard | 6 Kartu | 7 Cuaca | 8 Konten
+           9 Peta | 10 Modal | 11 Responsif
+   ========================================================= */
+
+/* ---------- 1. VARIABEL WARNA (mode gelap = bawaan) ---------- */
+:root {
+  --text: #f2f8ff;
+  --muted: #a9bdd0;
+  --glass: rgba(10, 24, 40, 0.55);
+  --glass-strong: rgba(8, 18, 32, 0.92);
+  --line: rgba(255, 255, 255, 0.16);
+  --accent: #5be3c4;
+  --accent2: #6aa8ff;
+  --danger: #ff6b6b;
+  --warn: #ffc857;
+  --radius: 20px;
+  --font: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-tech: "Orbitron", "Poppins", sans-serif;
+}
+
+/* Mode terang: dipasang JS lewat <html data-theme="light"> */
+html[data-theme="light"] {
+  --text: #0f2236;
+  --muted: #4b6278;
+  --glass: rgba(255, 255, 255, 0.62);
+  --glass-strong: rgba(255, 255, 255, 0.96);
+  --line: rgba(15, 34, 54, 0.14);
+  --accent: #0a9d86;
+  --accent2: #2563eb;
+}
+
+/* ---------- 2. DASAR ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+a { color: var(--accent); text-decoration: none; }
+button, input { font-family: inherit; font-size: 1rem; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+i[data-lucide], svg.lucide { width: 1.1em; height: 1.1em; vertical-align: -0.15em; }
+
+/* Efek kaca (glassmorphism) dipakai di banyak elemen */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ---------- 3. LATAR PEMANDANGAN ---------- */
+.bg-scene {
+  position: fixed; inset: 0; z-index: -2;
+  background: linear-gradient(180deg, #2f7fd6 0%, #6fb4ee 55%, #cfe8fb 100%);
+  transition: background 1.5s;
+}
+/* Kelas ini diganti JS sesuai waktu: bg-day, bg-night, bg-dawn */
+.bg-scene.bg-night { background: linear-gradient(180deg, #050b1d 0%, #14224a 60%, #26335f 100%); }
+.bg-scene.bg-dawn  { background: linear-gradient(180deg, #3a3f7a 0%, #e98a6a 60%, #ffd29a 100%); }
+
+/* Siluet gunung dan hutan (SVG tertanam) */
+.bg-scene::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300' preserveAspectRatio='none'%3E%3Cpath d='M0 180 L120 90 L210 150 L340 40 L470 160 L590 80 L720 170 L850 60 L1000 150 V300 H0Z' fill='%235d7aa0' fill-opacity='.55'/%3E%3Cpath d='M0 230 L100 170 L220 215 L360 140 L500 225 L650 160 L790 230 L900 180 L1000 220 V300 H0Z' fill='%232f5a62'/%3E%3Cpath d='M0 270 Q150 235 300 268 T620 255 T1000 262 V300 H0Z' fill='%230b3a34'/%3E%3C/svg%3E")
+    bottom / 100% 100% no-repeat;
+}
+.bg-overlay {
+  position: fixed; inset: 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.5));
+}
+html[data-theme="light"] .bg-overlay {
+  background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.1));
+}
+
+/* ---------- 4. NAVIGASI ---------- */
+.navbar {
+  position: sticky; top: 10px; z-index: 50;
+  margin: 10px auto 0; width: calc(100% - 24px); max-width: 1150px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 16px; border-radius: 999px;
+}
+.logo {
+  display: flex; align-items: center; gap: 8px; color: var(--text);
+  font-family: var(--font-tech); font-weight: 700; letter-spacing: .1em;
+  font-size: clamp(.8rem, 3.2vw, 1.05rem); white-space: nowrap;
+}
+.logo b { color: var(--accent); }
+
+.nav-links { display: flex; gap: 4px; }
+.nav-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 999px;
+  color: var(--muted); font-size: .9rem; transition: .25s;
+}
+.nav-btn:hover { color: var(--text); background: var(--line); }
+.nav-btn.active { color: #04201a; background: var(--accent); font-weight: 500; }
+
+.nav-actions { display: flex; gap: 6px; }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--text);
+  background: var(--line); transition: .25s;
+}
+.icon-btn:hover { background: var(--accent); color: #04201a; transform: rotate(12deg); }
+.menu-toggle { display: none; }
+
+/* ---------- 5. HALAMAN & DASHBOARD ---------- */
+.container { max-width: 1150px; margin: 0 auto; padding: 20px 14px 40px; }
+
+.page { display: none; }
+.page.active { display: block; animation: fadeUp .5s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.title { font-family: var(--font-tech); font-size: clamp(1.3rem, 5vw, 2rem); margin-bottom: 8px; }
+.title i { color: var(--accent); }
+.subtitle { margin: 28px 0 12px; font-weight: 500; font-size: 1.1rem; }
+.subtitle i { color: var(--accent); }
+.lead { color: var(--muted); margin-bottom: 20px; }
+
+.hero {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
+  gap: 18px; margin: 5vh 0 4vh;
+}
+.place { color: var(--muted); letter-spacing: .12em; text-transform: uppercase; font-size: .82rem; }
+.place.big { font-size: 1rem; margin: 18px 0 12px; color: var(--text); }
+.big-temp {
+  font-family: var(--font-tech); font-weight: 500; line-height: 1;
+  font-size: clamp(4rem, 18vw, 8rem); text-shadow: 0 4px 40px rgba(0,0,0,.3);
+}
+.big-temp small { font-size: .35em; color: var(--accent); }
+.cond { font-size: clamp(1.1rem, 4vw, 1.6rem); font-weight: 300; }
+.feels { color: var(--muted); font-size: .9rem; }
+
+.hero-right { text-align: right; }
+.clock { font-family: var(--font-tech); font-size: clamp(1.8rem, 8vw, 3rem); letter-spacing: .06em; }
+.date { color: var(--muted); }
+
+/* ---------- 6. KARTU ---------- */
+.grid { display: grid; gap: 14px; }
+.grid.stats { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.grid.cards { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+.card { border-radius: var(--radius); padding: 16px; transition: .3s; }
+.card:hover { transform: translateY(-4px); border-color: var(--accent); }
+.card h3 {
+  font-size: .72rem; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+}
+.value { font-family: var(--font-tech); font-size: 1.6rem; }
+.value small { font-family: var(--font); font-size: .8rem; color: var(--muted); margin-left: 4px; }
+.value.small-text { font-family: var(--font); font-size: 1.05rem; line-height: 1.4; }
+.sub { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+
+.bar { height: 5px; border-radius: 5px; background: var(--line); margin-top: 12px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; border-radius: 5px; transition: width .8s;
+  background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+
+/* ---------- 7. CUACA ---------- */
+.search {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 8px 8px 16px; border-radius: 999px;
+}
+.search input {
+  flex: 1; min-width: 130px; background: none; border: none; outline: none; padding: 8px 0;
+}
+.search input::placeholder { color: var(--muted); }
+
+.btn {
+  padding: 10px 20px; border-radius: 999px; font-weight: 500;
+  color: #04201a; background: var(--accent); transition: .25s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { transform: scale(1.04); filter: brightness(1.1); }
+.btn.ghost { background: var(--line); color: var(--text); }
+
+.results {
+  list-style: none; margin-top: 8px; border-radius: 16px; overflow: hidden;
+  background: var(--glass-strong);
+}
+.results li { padding: 12px 18px; cursor: pointer; border-bottom: 1px solid var(--line); }
+.results li:last-child { border-bottom: none; }
+.results li:hover { background: var(--line); }
+.results li small { color: var(--muted); display: block; }
+
+/* Peringatan cuaca ekstrem */
+.alert {
+  margin-top: 14px; padding: 14px 18px; border-radius: 16px;
+  border-left: 5px solid var(--warn); background: rgba(255, 200, 87, .18);
+}
+.alert.danger { border-color: var(--danger); background: rgba(255, 107, 107, .2); }
+.alert.ok { border-color: var(--accent); background: rgba(91, 227, 196, .14); }
+
+/* Per jam: bisa digeser ke samping */
+.hourly {
+  display: flex; gap: 10px; overflow-x: auto; padding: 14px;
+  border-radius: var(--radius); scroll-snap-type: x proximity;
+}
+.hour {
+  flex: 0 0 auto; min-width: 74px; text-align: center; padding: 10px 6px;
+  border-radius: 14px; background: var(--line); scroll-snap-align: start;
+}
+.hour .t { font-size: .8rem; color: var(--muted); }
+.hour .temp { font-family: var(--font-tech); margin: 4px 0; }
+.hour .rain { font-size: .75rem; color: var(--accent2); }
+
+/* 7 hari */
+.daily { display: grid; gap: 10px; }
+.day {
+  display: grid; grid-template-columns: 1.2fr auto 1fr 1fr; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: 16px;
+}
+.day .name { font-weight: 500; }
+.day .range { font-family: var(--font-tech); font-size: .9rem; text-align: right; }
+.day .rain { color: var(--accent2); font-size: .85rem; text-align: right; }
+
+/* ---------- 8. KARTU KONTEN (alam, fenomena, edukasi) ---------- */
+.info-card {
+  border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: .3s;
+  display: flex; flex-direction: column;
+}
+.info-card:hover { transform: translateY(-6px); border-color: var(--accent); }
+.info-card .thumb {
+  height: 150px; display: grid; place-items: center; font-size: 3.2rem;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+}
+.info-card .thumb svg { width: 56px; height: 56px; color: #fff; }
+.info-card .body { padding: 16px; }
+.info-card h3 { font-size: 1.1rem; margin-bottom: 6px; }
+.info-card p { color: var(--muted); font-size: .9rem; }
+.info-card .more { margin-top: 10px; color: var(--accent); font-size: .85rem; }
+
+.tag {
+  display: inline-block; padding: 3px 10px; margin: 8px 6px 0 0; border-radius: 999px;
+  font-size: .75rem; background: var(--line);
+}
+
+/* ---------- 9. PETA ---------- */
+.map-wrap { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-top: 14px; }
+#map { height: 520px; border-radius: var(--radius); overflow: hidden; z-index: 1; }
+.map-info { border-radius: var(--radius); padding: 18px; }
+.map-info h3 { margin-bottom: 10px; }
+.map-info p { margin-bottom: 8px; color: var(--muted); font-size: .92rem; }
+.map-info strong { color: var(--text); }
+
+/* ---------- 10. MODAL & TOAST ---------- */
+.modal {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  padding: 16px; background: rgba(0,0,0,.6); animation: fade .25s;
+}
+.modal[hidden] { display: none; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.modal-box {
+  position: relative; width: 100%; max-width: 640px; max-height: 88vh; overflow-y: auto;
+  border-radius: 24px; padding: 24px; background: var(--glass-strong);
+}
+.modal-box h2 { font-family: var(--font-tech); font-size: 1.3rem; margin: 6px 0 12px; padding-right: 44px; }
+.modal-box h4 { margin: 16px 0 6px; color: var(--accent); }
+.modal-box p, .modal-box li { color: var(--muted); }
+.modal-box ul { padding-left: 20px; }
+.modal-close { position: absolute; top: 14px; right: 14px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 120;
+  padding: 12px 22px; border-radius: 999px; max-width: 92%; text-align: center;
+  border-color: var(--danger); animation: fadeUp .3s;
+}
+.toast[hidden] { display: none; }
+
+.footer { text-align: center; padding: 24px 14px 36px; color: var(--muted); font-size: .8rem; }
+
+/* Tampilan saat data sedang dimuat */
+.loading { opacity: .5; animation: pulse 1.2s infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+
+/* ---------- 11. RESPONSIF (HP) ---------- */
+@media (max-width: 860px) {
+  .menu-toggle { display: grid; }
+  .nav-links {
+    position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+    flex-direction: column; padding: 10px; border-radius: 20px;
+    background: var(--glass-strong); border: 1px solid var(--line);
+    display: none;
+  }
+  .nav-links.open { display: flex; animation: fadeUp .25s; }
+  .nav-btn { padding: 12px 16px; border-radius: 12px; }
+  .map-wrap { grid-template-columns: 1fr; }
+  #map { height: 380px; }
+  .hero-right { text-align: left; }
+}
+
+@media (max-width: 520px) {
+  .day { grid-template-columns: 1fr auto; }
+  .day .range, .day .rain { text-align: left; }
+  .search { border-radius: 24px; }
+  .search .btn { flex: 1; justify-content: center; }
+}
+
+/* Hormati pengguna yang menonaktifkan animasi */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

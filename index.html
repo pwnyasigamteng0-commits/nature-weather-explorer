@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Informasi alam, lingkungan, iklim, dan cuaca di seluruh dunia.">
+  <title>Nature & Weather Explorer</title>
+
+  <!-- Font modern -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- CSS peta Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- CSS kita sendiri -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Latar pemandangan alam -->
+  <div class="bg-scene" id="bgScene"></div>
+  <div class="bg-overlay"></div>
+
+  <!-- ================= NAVIGASI ================= -->
+  <header class="navbar glass">
+    <a href="#dashboard" class="logo" data-page="dashboard">
+      <i data-lucide="globe-2"></i>
+      <span>NATURE <b>&amp;</b> WEATHER</span>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <button class="nav-btn active" data-page="dashboard"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+      <button class="nav-btn" data-page="weather"><i data-lucide="cloud-sun"></i> Cuaca</button>
+      <button class="nav-btn" data-page="nature"><i data-lucide="trees"></i> Alam</button>
+      <button class="nav-btn" data-page="phenomena"><i data-lucide="zap"></i> Fenomena</button>
+      <button class="nav-btn" data-page="map"><i data-lucide="map"></i> Peta</button>
+      <button class="nav-btn" data-page="education"><i data-lucide="leaf"></i> Edukasi</button>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="icon-btn" id="themeBtn" aria-label="Ganti tema"><i data-lucide="moon"></i></button>
+      <button class="icon-btn menu-toggle" id="menuBtn" aria-label="Buka menu"><i data-lucide="menu"></i></button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Pesan error / info global -->
+    <div class="toast glass" id="toast" role="alert" hidden></div>
+
+    <!-- ================= 1. DASHBOARD ================= -->
+    <section class="page active" id="page-dashboard">
+      <div class="hero">
+        <div class="hero-left">
+          <p class="place"><i data-lucide="map-pin"></i> <span id="dashPlace">Memuat lokasi...</span></p>
+          <h1 class="big-temp"><span id="dashTemp">--</span><small>°C</small></h1>
+          <p class="cond"><i data-lucide="cloud" id="dashIcon"></i> <span id="dashCond">--</span></p>
+          <p class="feels">Terasa seperti <span id="dashFeels">--</span>°C</p>
+        </div>
+        <div class="hero-right">
+          <div class="clock" id="clock">--:--:--</div>
+          <div class="date" id="date">--</div>
+        </div>
+      </div>
+
+      <div class="grid stats">
+        <article class="card glass">
+          <h3><i data-lucide="droplets"></i> Kelembapan</h3>
+          <p class="value"><span id="dashHumidity">--</span><small>%</small></p>
+          <div class="bar"><i id="humBar"></i></div>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="wind"></i> Angin</h3>
+          <p class="value"><span id="dashWind">--</span><small>km/j</small></p>
+          <p class="sub" id="dashWindDir">--</p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="gauge"></i> Tekanan Udara</h3>
+          <p class="value"><span id="dashPressure">--</span><small>hPa</small></p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="cloudy"></i> Kondisi Langit</h3>
+          <p class="value small-text" id="dashSky">--</p>
+          <p class="sub">Awan: <span id="dashCloud">--</span>%</p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="sunrise"></i> Matahari Terbit</h3>
+          <p class="value" id="dashSunrise">--:--</p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="sunset"></i> Matahari Terbenam</h3>
+          <p class="value" id="dashSunset">--:--</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= 2. CUACA ================= -->
+    <section class="page" id="page-weather">
+      <h2 class="title"><i data-lucide="cloud-sun"></i> Informasi Cuaca</h2>
+
+      <!-- Pencarian kota -->
+      <form class="search glass" id="searchForm" autocomplete="off">
+        <i data-lucide="search"></i>
+        <input type="text" id="searchInput" placeholder="Cari kota atau negara... (contoh: Bandung)" required>
+        <button type="submit" class="btn">Cari</button>
+        <button type="button" class="btn ghost" id="locateBtn"><i data-lucide="locate-fixed"></i> Lokasi Saya</button>
+      </form>
+      <ul class="results glass" id="searchResults" hidden></ul>
+
+      <!-- Peringatan cuaca ekstrem -->
+      <div class="alert" id="alertBox" hidden></div>
+
+      <p class="place big"><i data-lucide="map-pin"></i> <span id="wPlace">--</span></p>
+
+      <!-- Kartu ringkasan -->
+      <div class="grid stats">
+        <article class="card glass">
+          <h3><i data-lucide="thermometer"></i> Suhu Sekarang</h3>
+          <p class="value"><span id="wTemp">--</span><small>°C</small></p>
+          <p class="sub" id="wCond">--</p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="cloud-rain"></i> Hujan</h3>
+          <p class="value"><span id="wRain">--</span><small>mm</small></p>
+          <p class="sub">Peluang hujan: <span id="wRainProb">--</span>%</p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="cloud-lightning"></i> Badai &amp; Petir</h3>
+          <p class="value small-text" id="wStorm">--</p>
+          <p class="sub">Hembusan angin: <span id="wGust">--</span> km/j</p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="sun"></i> Indeks UV</h3>
+          <p class="value"><span id="wUv">--</span></p>
+          <p class="sub" id="wUvText">--</p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="factory"></i> Kualitas Udara (AQI)</h3>
+          <p class="value"><span id="wAqi">--</span></p>
+          <p class="sub" id="wAqiText">--</p>
+        </article>
+        <article class="card glass">
+          <h3><i data-lucide="eye"></i> Jarak Pandang</h3>
+          <p class="value"><span id="wVis">--</span><small>km</small></p>
+        </article>
+      </div>
+
+      <!-- Prakiraan per jam -->
+      <h3 class="subtitle"><i data-lucide="clock"></i> Prakiraan Per Jam (24 jam)</h3>
+      <div class="hourly glass" id="hourly"></div>
+
+      <!-- Prakiraan 7 hari -->
+      <h3 class="subtitle"><i data-lucide="calendar-days"></i> Prakiraan 7 Hari</h3>
+      <div class="daily" id="daily"></div>
+    </section>
+
+    <!-- ================= 3. EKSPLORASI ALAM ================= -->
+    <section class="page" id="page-nature">
+      <h2 class="title"><i data-lucide="trees"></i> Eksplorasi Alam</h2>
+      <p class="lead">Jelajahi ekosistem dan bentang alam paling menakjubkan di Bumi.</p>
+      <div class="grid cards" id="natureGrid"></div>
+    </section>
+
+    <!-- ================= 4. FENOMENA ALAM ================= -->
+    <section class="page" id="page-phenomena">
+      <h2 class="title"><i data-lucide="zap"></i> Fenomena Alam</h2>
+      <p class="lead">Penjelasan ilmiah yang mudah dipahami. Ketuk kartu untuk membaca selengkapnya.</p>
+      <div class="grid cards" id="phenomenaGrid"></div>
+    </section>
+
+    <!-- ================= 5. PETA ================= -->
+    <section class="page" id="page-map">
+      <h2 class="title"><i data-lucide="map"></i> Peta &amp; Lokasi</h2>
+
+      <form class="search glass" id="mapSearchForm" autocomplete="off">
+        <i data-lucide="search"></i>
+        <input type="text" id="mapSearchInput" placeholder="Cari wilayah... (contoh: Kalimantan)" required>
+        <button type="submit" class="btn">Cari</button>
+      </form>
+
+      <div class="map-wrap">
+        <div id="map" class="glass"></div>
+        <aside class="map-info glass" id="mapInfo">
+          <h3><i data-lucide="info"></i> Info Lokasi</h3>
+          <p>Ketuk titik mana saja di peta untuk melihat cuaca dan kondisi lingkungannya.</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ================= 6. EDUKASI LINGKUNGAN ================= -->
+    <section class="page" id="page-education">
+      <h2 class="title"><i data-lucide="leaf"></i> Edukasi Lingkungan</h2>
+      <p class="lead">Kenali masalah lingkungan dan apa yang bisa kita lakukan bersama.</p>
+      <div class="grid cards" id="educationGrid"></div>
+    </section>
+
+  </main>
+
+  <!-- Jendela detail (dipakai untuk artikel & kartu) -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-box glass">
+      <button class="icon-btn modal-close" id="modalClose" aria-label="Tutup"><i data-lucide="x"></i></button>
+      <img id="modalImg" alt="" hidden>
+      <h2 id="modalTitle"></h2>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 Nature &amp; Weather Explorer · Data cuaca: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> · Peta: © OpenStreetMap</p>
+  </footer>
+
+  <!-- Library: Lucide (ikon) dan Leaflet (peta) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- JavaScript kita sendiri -->
+  <script src="script.js"></script>
+</body>
+</html>
